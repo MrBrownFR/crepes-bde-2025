@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crêpes GALAX'ISMIN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        select, input, button, textarea {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button:hover:enabled {
+            background-color: #45a049;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+        .required {
+            color: red;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .captcha-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+    </style>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Crêpes GALAX'ISMIN</h1>
+        <p>Bienvenue sur notre site de commande de crêpes ! Choisissez vos crêpes préférées et passez commande facilement.</p>
+        <form id="crepeForm">
+            <label for="type">Type de crêpe <span class="required">*</span>:</label>
+            <select id="type" name="type" required onchange="updateGarnitures()">
+                <option value="sucree">Sucrée</option>
+                <option value="salee">Salée</option>
+            </select>
+
+            <label for="garniture">Garniture <span class="required">*</span>:</label>
+            <select id="garniture" name="garniture" required>
+                <option value="nutella">Nutella</option>
+                <option value="confiture">Confiture</option>
+                <option value="jambon">Jambon</option>
+                <option value="fromage">Fromage</option>
+            </select>
+
+            <button type="button" id="addButton" onclick="ajouterCrepe()">Ajouter à la liste</button>
+
+            <ul id="listeCrepes"></ul>
+
+            <label for="nom">Nom <span class="required">*</span>:</label>
+            <input type="text" id="nom" name="nom" required>
+
+            <label for="prenom">Prénom <span class="required">*</span>:</label>
+            <input type="text" id="prenom" name="prenom" required>
+
+            <label for="adresse">Adresse de livraison <span class="required">*</span>:</label>
+            <input type="text" id="adresse" name="adresse" required>
+
+            <label for="horaire">Horaire de livraison <span class="required">*</span>:</label>
+            <input type="datetime-local" id="horaire" name="horaire" required>
+
+            <label for="notes">Notes de livraison :</label>
+            <textarea id="notes" name="notes" rows="4"></textarea>
+
+            <div class="captcha-container">
+                <div class="g-recaptcha" data-sitekey="VOTRE_CLE_DE_SITE"></div>
+            </div>
+
+            <div class="error" id="error-message"></div>
+
+            <button type="button" onclick="envoyerCommande()" id="submitButton" disabled>Valider et Envoyer</button>
+        </form>
+    </div>
+
+    <script>
+        const listeCrepes = [];
+        const CREPE_LIMIT = 5;
+
+        const garnitures = {
+            sucrees: ['nutella', 'confiture'],
+            salees: ['jambon', 'fromage']
+        };
+
+        function updateGarnitures() {
+            const type = document.getElementById('type').value;
+            const garnitureSelect = document.getElementById('garniture');
+            garnitureSelect.innerHTML = '';
+
+            const options = type === 'sucree' ? garnitures.sucrees : garnitures.salees;
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option.charAt(0).toUpperCase() + option.slice(1);
+                garnitureSelect.appendChild(opt);
+            });
+        }
+
+        function ajouterCrepe() {
+            if (listeCrepes.length >= CREPE_LIMIT) {
+                alert(`Vous ne pouvez pas ajouter plus de ${CREPE_LIMIT} crêpes par commande.`);
+                return;
+            }
+
+            const type = document.getElementById('type').value;
+            const garniture = document.getElementById('garniture').value;
+            const crepe = { type, garniture };
+            listeCrepes.push(crepe);
+            afficherListe();
+            verifierFormulaire();
+            verifierLimiteCrepes();
+        }
+
+        function afficherListe() {
+            const ul = document.getElementById('listeCrepes');
+            ul.innerHTML = '';
+            listeCrepes.forEach((crepe, index) => {
+                const li = document.createElement('li');
+                li.textContent = `Crêpe ${crepe.type} avec ${crepe.garniture}`;
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Supprimer';
+                deleteButton.className = 'delete-button';
+                deleteButton.onclick = () => supprimerCrepe(index);
+                li.appendChild(deleteButton);
+                ul.appendChild(li);
+            });
+        }
+
+        function supprimerCrepe(index) {
+            listeCrepes.splice(index, 1);
+            afficherListe();
+            verifierFormulaire();
+            verifierLimiteCrepes();
+        }
+
+        function envoyerCommande() {
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const adresse = document.getElementById('adresse').value;
+            const horaire = document.getElementById('horaire').value;
+            const notes = document.getElementById('notes').value;
+            const errorMessage = document.getElementById('error-message');
+
+            errorMessage.textContent = '';
+
+            if (!nom || !prenom || !adresse || !horaire || listeCrepes.length === 0) {
+                errorMessage.textContent = 'Veuillez remplir tous les champs obligatoires et ajouter au moins une crêpe à la liste.';
+                return;
+            }
+
+            const commande = {
+                nom,
+                prenom,
+                adresse,
+                horaire,
+                notes,
+                crepes: listeCrepes
+            };
+
+            // Vérification du CAPTCHA côté serveur nécessaire ici
+
+            fetch('/commander', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(commande)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'envoi de la commande.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Commande envoyée avec succès !');
+                document.getElementById('crepeForm').reset();
+                grecaptcha.reset(); // Réinitialiser le CAPTCHA
+                listeCrepes.length = 0;
+                afficherListe();
+                verifierFormulaire();
+                verifierLimiteCrepes();
+            })
+            .catch(error => {
+                errorMessage.textContent = error.message;
+            });
+        }
+
+        function verifierFormulaire() {
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const adresse = document.getElementById('adresse').value;
+            const horaire = document.getElementById('horaire').value;
+            const submitButton = document.getElementById('submitButton');
+
+            submitButton.disabled = !nom || !prenom || !adresse || !horaire || listeCrepes.length === 0;
+        }
+
+        function verifierLimiteCrepes() {
+            const addButton = document.getElementById('addButton');
+            if (listeCrepes.length >= CREPE_LIMIT) {
+                addButton.disabled = true;
+                addButton.textContent = `Limite de ${CREPE_LIMIT} crêpes atteinte`;
+            } else {
+                addButton.disabled = false;
+                addButton.textContent = 'Ajouter à la liste';
+            }
+        }
+
+        // Initialiser les garnitures en fonction du type sélectionné par défaut
+        updateGarnitures();
+
+        // Ajouter des écouteurs d'événements pour vérifier le formulaire à chaque modification
+        document.getElementById('nom').addEventListener('input', verifierFormulaire);
+        document.getElementById('prenom').addEventListener('input', verifierFormulaire);
+        document.getElementById('adresse').addEventListener('input', verifierFormulaire);
+        document.getElementById('horaire').addEventListener('input', verifierFormulaire);
+    </script>
+</body>
+</html>
