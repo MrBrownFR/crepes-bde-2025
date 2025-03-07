@@ -106,6 +106,9 @@
             <label for="prenom">Prénom <span class="required">*</span>:</label>
             <input type="text" id="prenom" name="prenom" required>
 
+            <label for="telephone">Numéro de téléphone <span class="required">*</span>:</label>
+            <input type="tel" id="telephone" name="telephone" required>
+
             <label for="adresse">Adresse de livraison <span class="required">*</span>:</label>
             <input type="text" id="adresse" name="adresse" required>
 
@@ -205,6 +208,7 @@
         async function envoyerCommande() {
             const nom = document.getElementById('nom').value;
             const prenom = document.getElementById('prenom').value;
+            const telephone = document.getElementById('telephone').value;
             const adresse = document.getElementById('adresse').value;
             const horaire = document.getElementById('horaire').value;
             const notes = document.getElementById('notes').value;
@@ -212,7 +216,7 @@
 
             errorMessage.textContent = '';
 
-            if (!nom || !prenom || !adresse || !horaire || listeCrepes.length === 0) {
+            if (!nom || !prenom || !telephone || !adresse || !horaire || listeCrepes.length === 0) {
                 errorMessage.textContent = 'Veuillez remplir tous les champs obligatoires et ajouter au moins une crêpe à la liste.';
                 return;
             }
@@ -220,6 +224,7 @@
             const commande = {
                 nom,
                 prenom,
+                telephone,
                 adresse,
                 horaire,
                 notes,
@@ -247,11 +252,12 @@
         function verifierFormulaire() {
             const nom = document.getElementById('nom').value;
             const prenom = document.getElementById('prenom').value;
+            const telephone = document.getElementById('telephone').value;
             const adresse = document.getElementById('adresse').value;
             const horaire = document.getElementById('horaire').value;
             const submitButton = document.getElementById('submitButton');
 
-            submitButton.disabled = !nom || !prenom || !adresse || !horaire || listeCrepes.length === 0;
+            submitButton.disabled = !nom || !prenom || !telephone || !adresse || !horaire || listeCrepes.length === 0;
         }
 
         function verifierLimiteCrepes() {
@@ -271,6 +277,7 @@
         // Ajouter des écouteurs d'événements pour vérifier le formulaire à chaque modification
         document.getElementById('nom').addEventListener('input', verifierFormulaire);
         document.getElementById('prenom').addEventListener('input', verifierFormulaire);
+        document.getElementById('telephone').addEventListener('input', verifierFormulaire);
         document.getElementById('adresse').addEventListener('input', verifierFormulaire);
         document.getElementById('horaire').addEventListener('input', verifierFormulaire);
     </script>
