@@ -126,8 +126,10 @@
     </div>
 
     <script type="module">
-       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-       // Configuration Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDLcny52J6-Y4tAgcZxLf7eb7wO3q-9Xg4",
             authDomain: "crepes-bde.firebaseapp.com",
@@ -138,8 +140,8 @@
         };
 
         // Initialiser Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         const listeCrepes = [];
         const CREPE_LIMIT = 5;
@@ -222,11 +224,13 @@
                 horaire,
                 notes,
                 crepes: listeCrepes,
-                date: new Date()
+                timestamp: (new Date()).getTime(),
             };
 
             try {
-                const docRef = await db.collection('commandes').add(commande);
+                // const docRef = await db.collection('commandes').add(commande);
+                await setDoc(doc(db, "(default)", `${commande.timestamp}-${commande.nom}-${commande.prenom}`), commande);
+                
                 console.log("Document écrit avec ID: ", docRef.id);
                 alert('Commande envoyée avec succès !');
                 document.getElementById('crepeForm').reset();
