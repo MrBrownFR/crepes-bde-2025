@@ -119,15 +119,17 @@
             <textarea id="notes" name="notes" rows="4"></textarea>
 
             <div class="captcha-container">
-                <div class="g-recaptcha" data-sitekey="VOTRE_CLE_DE_SITE"></div>
+                <div class="g-recaptcha" id="captcha"></div>
             </div>
 
             <div class="error" id="error-message"></div>
 
-            <button type="button" onclick="envoyerCommande()" id="submitButton" disabled>Valider et Envoyer</button>
+            <button 
+                type="button" onclick="envoyerCommande()" id="submitButton" disabled>Valider et Envoyer</button>
         </form>
     </div>
 
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdmeOwqAAAAANTm4Yw3LkoXxa9K_NHPGX4bWnqL"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
         import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
@@ -210,6 +212,15 @@
         window.supprimerCrepe = supprimerCrepe;
 
         async function envoyerCommande() {
+            
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6LdmeOwqAAAAANTm4Yw3LkoXxa9K_NHPGX4bWnqL', {action: 'submit'}).then(function(token) {
+                    const response = grecaptcha.getResponse("captcha");
+                    if (!response.success)  {
+                        return;
+                    }
+                });
+            });        
             const nom = document.getElementById('nom').value;
             const prenom = document.getElementById('prenom').value;
             const telephone = document.getElementById('telephone').value;
