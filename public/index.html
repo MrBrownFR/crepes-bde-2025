@@ -76,6 +76,9 @@
             margin-top: 10px;
         }
     </style>
+    <!-- Ajouter les scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
@@ -127,6 +130,20 @@
     </div>
 
     <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLcny52J6-Y4tAgcZxLf7eb7wO3q-9Xg4",
+            authDomain: "crepes-bde.firebaseapp.com",
+            projectId: "crepes-bde",
+            storageBucket: "crepes-bde.firebasestorage.app",
+            messagingSenderId: "446188941634",
+            appId: "1:446188941634:web:582426fb4464968970d8db"
+        };
+
+        // Initialiser Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+
         const listeCrepes = [];
         const CREPE_LIMIT = 5;
 
@@ -186,7 +203,7 @@
             verifierLimiteCrepes();
         }
 
-        function envoyerCommande() {
+        async function envoyerCommande() {
             const nom = document.getElementById('nom').value;
             const prenom = document.getElementById('prenom').value;
             const adresse = document.getElementById('adresse').value;
@@ -207,25 +224,13 @@
                 adresse,
                 horaire,
                 notes,
-                crepes: listeCrepes
+                crepes: listeCrepes,
+                date: new Date()
             };
 
-            // Vérification du CAPTCHA côté serveur nécessaire ici
-
-            fetch('/commander', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(commande)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur lors de l\'envoi de la commande.');
-                }
-                return response.json();
-            })
-            .then(data => {
+            try {
+                const docRef = await db.collection('commandes').add(commande);
+                console.log("Document écrit avec ID: ", docRef.id);
                 alert('Commande envoyée avec succès !');
                 document.getElementById('crepeForm').reset();
                 grecaptcha.reset(); // Réinitialiser le CAPTCHA
@@ -233,10 +238,9 @@
                 afficherListe();
                 verifierFormulaire();
                 verifierLimiteCrepes();
-            })
-            .catch(error => {
-                errorMessage.textContent = error.message;
-            });
+            } catch (error) {
+                errorMessage.textContent = "Erreur lors de l'envoi de la commande: " + error;
+            }
         }
 
         function verifierFormulaire() {
