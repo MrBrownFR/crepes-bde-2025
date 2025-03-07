@@ -215,7 +215,7 @@
             
             grecaptcha.ready(function() {
                 grecaptcha.execute('6LdmeOwqAAAAANTm4Yw3LkoXxa9K_NHPGX4bWnqL', {action: 'submit'}).then(function(token) {
-                    const response = grecaptcha.getResponse("captcha");
+                    const response = grecaptcha.getResponse();
                     if (!response.success)  {
                         return;
                     }
