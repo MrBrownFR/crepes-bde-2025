@@ -129,8 +129,8 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
 
         // Configuration Firebase
         const firebaseConfig = {
@@ -145,7 +145,7 @@
         // Initialiser Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
+        
         const listeCrepes = [];
         const CREPE_LIMIT = 5;
 
@@ -167,6 +167,7 @@
                 garnitureSelect.appendChild(opt);
             });
         }
+        window.updateGarnitures = updateGarnitures;
 
         function ajouterCrepe() {
             if (listeCrepes.length >= CREPE_LIMIT) {
@@ -182,6 +183,7 @@
             verifierFormulaire();
             verifierLimiteCrepes();
         }
+        window.ajouterCrepe = ajouterCrepe;
 
         function afficherListe() {
             const ul = document.getElementById('listeCrepes');
@@ -197,6 +199,7 @@
                 ul.appendChild(li);
             });
         }
+        window.afficherListe = afficherListe;
 
         function supprimerCrepe(index) {
             listeCrepes.splice(index, 1);
@@ -204,6 +207,7 @@
             verifierFormulaire();
             verifierLimiteCrepes();
         }
+        window.supprimerCrepe = supprimerCrepe;
 
         async function envoyerCommande() {
             const nom = document.getElementById('nom').value;
@@ -234,9 +238,10 @@
 
             try {
                 // const docRef = await db.collection('commandes').add(commande);
-                await setDoc(doc(db, "(default)", `${commande.timestamp}-${commande.nom}-${commande.prenom}`), commande);
+                const id = `${commande.timestamp}-${commande.nom}-${commande.prenom}`;
+                await setDoc(doc(db, "(default)", id), commande);
                 
-                console.log("Document écrit avec ID: ", docRef.id);
+                console.log("Document écrit avec ID: ", id);
                 alert('Commande envoyée avec succès !');
                 document.getElementById('crepeForm').reset();
                 grecaptcha.reset(); // Réinitialiser le CAPTCHA
@@ -248,6 +253,7 @@
                 errorMessage.textContent = "Erreur lors de l'envoi de la commande: " + error;
             }
         }
+        window.envoyerCommande = envoyerCommande;
 
         function verifierFormulaire() {
             const nom = document.getElementById('nom').value;
