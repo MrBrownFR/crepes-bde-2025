@@ -76,10 +76,6 @@
             margin-top: 10px;
         }
     </style>
-    <!-- Ajouter les scripts Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
     <div class="container">
@@ -129,8 +125,9 @@
         </form>
     </div>
 
-    <script>
-        // Configuration Firebase
+    <script type="module">
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+       // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDLcny52J6-Y4tAgcZxLf7eb7wO3q-9Xg4",
             authDomain: "crepes-bde.firebaseapp.com",
